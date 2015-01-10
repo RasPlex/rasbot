@@ -23,8 +23,10 @@ module.exports = (robot) ->
     updateReleases: ->
       robot.github.github.releases.listReleases {owner: 'RasPlex', repo: 'RasPlex' }, (err,newReleases) ->
         releases = {}
+        count=0
         for release in newReleases
           if 'body' of release
+            count+=1
             bodytext = release['body']
             try
               body = Yaml.load bodytext
@@ -41,6 +43,7 @@ module.exports = (robot) ->
               channel: channel
               notes: body['changes'].join('\n')
               time: time
+              id: count
 
             for asset in release['assets']
               if /img.gz/.test asset['name']
