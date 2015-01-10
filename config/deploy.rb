@@ -11,8 +11,7 @@ if ENV.has_key? "REVISION" or ENV.has_key? "BRANCH_NAME"
   set :branch, ENV["REVISION"] || ENV["BRANCH_NAME"]
 end
 
-set :linked_dirs, %w{node_modules}
-
+set :linked_dirs, %w{node_modules crashdata}
 
 namespace :deploy do
 
