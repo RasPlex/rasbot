@@ -3,6 +3,7 @@ Yaml = require 'js-yaml'
 GitHubApi = require "github"
 CronJob = require('cron').CronJob
 moment = require 'moment'
+posix = require 'posix'
 
 config =
   token:          process.env.HUBOT_GITHUB_TOKEN

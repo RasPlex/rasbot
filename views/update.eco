@@ -1,11 +1,8 @@
-
-"""
 <?xml version="1.0" encoding="UTF-8"?>
-<MediaContainer friendlyName="myPlex" identifier="com.plexapp.plugins.myplex" size="<%= releases.size %>" title="Updates">
-  <% releases.each do |release| %>
-    <Release id="<%= release.id%>" version="<%= release.version %>" added="" fixed="" live="true" autoupdate="<%= release.autoupdate %>" createdAt="<%=release.time.new_offset(0).strftime("%Y-%m-%d %H:%M:%S UTC")%>">
-      <Package file="<%= release.update_url %>" fileHash="<%= release.update_sum %>" fileName="<%= release.update_url.split("/")[-1]  %>" delta="false"/>
+<MediaContainer friendlyName="myPlex" identifier="com.plexapp.plugins.myplex" size="<%= @releases.length %>" title="Updates">
+  <% for release in @releases: %>
+    <Release id="<%= '1' %>" version="<%= release['version'] %>" added="" fixed="" live="true" autoupdate="<%= release['autoupdate'] %>" createdAt="<%= 't'%>">
+      <Package file="<%= release['update_url'] %>" fileHash="<%= release['update_sum'] %>" fileName="<%= release['update_url'].split("/")[-1]  %>" delta="false"/>
     </Release>
   <% end %>
 </MediaContainer>
-"""

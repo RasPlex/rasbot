@@ -9,6 +9,7 @@ module.exports = (robot) ->
     releases.push release for version,release of robot.github.releases['stable']
     releases.push release for version,release of robot.github.releases['prerelease']
     res.send JSON.stringify releases
+    res.end()
   #
   # robot.error (err, msg) ->
   #   robot.logger.error "DOES NOT COMPUTE"
