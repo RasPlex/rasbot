@@ -20,3 +20,5 @@ module.exports = (robot) ->
     update_xml = eco.render template, releases: releases, moment:moment
     res.send update_xml
 
+  robot.respond /whitelist/, (msg) ->
+    msg.send "Hi #{msg.message.user.name}, the following serials are whitelisted: #{config.whitelist.join('\n')}"
