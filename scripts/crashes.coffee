@@ -1,11 +1,15 @@
 fs = require "fs"
 path = require "path"
+zlib = require 'zlib'
+mkdirp = require 'mkdirp'
 base64 = require 'base64'
 
 module.exports = (robot) ->
 
   robot.router.post '/crashes', (req, res) ->
-    if 'dumpfileb64' of req.body
+    if 'dumpfileb64' of req.body and
+       'version' of req.body
+      version = req.body['version']
       countpath = path.dirname(__dirname) + "/crashdata/count"
 
       if fs.existsSync countpath
@@ -18,7 +22,9 @@ module.exports = (robot) ->
         robot.logger.error("Error writing count file", error) if error
 
       id = count
-      crashpath = path.dirname(__dirname) + "/crashdata/crash-#{id}"
+      crashdir = path.dirname(__dirname) + "/crashdata/#{version}"
+      mkdirp crashdir
+      crashpath = "#{crashdir}/crash-#{id}"
       robot.logger.debug "Creating new crash #{crashpath}"
       fs.writeFile crashpath, base64.decode(req.body['dumpfileb64']), (error) ->
         robot.logger.error("Error writing file", error) if error

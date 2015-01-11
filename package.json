@@ -16,6 +16,7 @@
     "hubot-scripts": "^2.5.16",
     "hubot-slack": "^3.2.1",
     "js-yaml": "^3.2.5",
+    "mkdirp": "^0.5.0",
     "moment": "^2.9.0",
     "mysql": "^2.5.4",
     "node-uuid": "^1.4.2",
