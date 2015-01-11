@@ -65,6 +65,15 @@ module.exports = (robot) ->
   },
   { tableName: 'update_completeds', timestamps: false }
 
+  intVersion = (version) ->
+    version = version.replace /\D/g, ''
+    try
+      version = parseInt version,10
+    catch
+      version = -1
+    version = -1 if isNaN version
+    return version
+
   robot.whitelist = new Whitelist
   robot.orm.sync()
   robot.updateTemplate = fs.readFileSync path.dirname(__dirname) + "/views/update.eco", "utf-8"
@@ -76,18 +85,25 @@ module.exports = (robot) ->
       addr = req.headers['x-forwarded-for'] || req.connection.remoteAddress
 
       channel = channels[req.query['channel']]
-      robot.logger.debug "Getting updates for #{channel}"
 
       releases = []
       whitelist = []
       for user,serials of robot.whitelist.get()
         whitelist = whitelist.concat serials
 
-      releases.push release for version,release of robot.github.releases['stable']
+      for version,release of robot.github.releases['stable']
+        if intVersion(version) > intVersion(req.query['version'])
+          releases.push release
+
       if channel == 'prerelease'
-        releases.push release for version,release of robot.github.releases['prerelease']
+        for version,release of robot.github.releases['prerelease']
+          if intVersion(version) > intVersion(req.query['version'])
+            releases.push release
+
       if channel == 'beta' and req.query['serial']? and req.query['serial'] in whitelist
-        releases.push release for version,release of robot.github.releases['beta']
+        for version,release of robot.github.releases['beta']
+          if intVersion(version) > intVersion(req.query['version'])
+            releases.push release
 
       update_req = robot.UpdateRequest.build({
         serial:  req.query['serial']
