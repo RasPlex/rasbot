@@ -1,0 +1,20 @@
+{
+  "development" :{
+    "database" :"rasplex_updater",
+    "username" : "updater",
+    "password" : "updater",
+    "options" : {
+      "host" :    "127.0.0.1",
+      "storage": "./db.development.sqlite",
+      "dialect" : "sqlite"
+    }
+  },
+  "production" : {
+    "database" :"rasplex_updater",
+    "username" : "updater",
+    "options" : {
+      "host" :    "127.0.0.1",
+      "dialect" : "mysql"
+    }
+  }
+}
