@@ -8,8 +8,7 @@ module.exports = (robot) ->
 
   robot.router.post '/crashes', (req, res) ->
     robot.logger.debug JSON.stringify req.params
-    if 'dumpfileb64' of req.body and
-      req.params.version?
+    if 'dumpfileb64' of req.body and req.params.version?
       robot.logger.debug JSON.stringify req.params
       version = req.params.version
       countpath = path.dirname(__dirname) + "/crashdata/count"
