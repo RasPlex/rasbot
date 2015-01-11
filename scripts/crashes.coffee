@@ -51,7 +51,7 @@ module.exports = (robot) ->
         serial:            req.query['serial']
         hwrev:             req.query['revision']
         version:           req.query['version']
-        ipaddr:            addrp
+        ipaddr:            addr
         time:              new Date
         crash_path:        crashpath
         submitter_version: req.query['submitter_version']
