@@ -17,10 +17,9 @@ module.exports = (robot) ->
 
   robot.updateTemplate = fs.readFileSync path.dirname(__dirname) + "/views/update.eco", "utf-8"
   robot.router.get '/update', (req, res) ->
-    robot.logger.debug req.query
     if 'channel' of req.query
       channel = channels[req.query['channel']]
-      robot.logger.debug channel
+      robot.logger.debug "Getting updates for #{channel}"
       releases = []
       releases.push release for version,release of robot.github.releases['stable']
       if channel == 'prerelease'
