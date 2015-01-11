@@ -1,14 +1,13 @@
 # Description:
-#   Service install requests
+#   Service update requests, and manage the whitelist for the beta channel
 #
 # Commands:
-#   hubot whitelist - show the whitelisted users
+#   hubot whitelist show - show the whitelisted users
+#   hubot whitelist add [user] [serial]  - whitelist a given serial for a user
+#   hubot whitelist remove [user] [serial]  - remove a whitelisted serial for a user
 #
 # Author
 #   dalehamel
-#
-# Notes:
-#  * To do: store serials in brain instead of reading from env var
 
 
 eco  = require "eco"
@@ -18,9 +17,6 @@ moment = require 'moment'
 
 Sequelize = require 'sequelize'
 
-config =
-  whitelist: if process.env.HUBOT_BETA_WHITELIST? then process.env.HUBOT_BETA_WHITELIST.split(',') else []
-
 channels = {
   "16":"stable",
   "2":"prerelease",
@@ -28,6 +24,25 @@ channels = {
 }
 
 module.exports = (robot) ->
+
+  class Whitelist
+
+    add: (user, serial) ->
+      whitelist = robot.brain.get('whitelist') || {}
+      whitelist[user] = [] unless user of whitelist
+      whitelist[user].push serial
+      robot.brain.set('whitelist', whitelist )
+      return true
+
+    remove: (user, serialToRemove) ->
+      whitelist = robot.brain.get('whitelist') || {}
+      newlist = whitelist[user].filter (serial) -> serial isnt serialToRemove
+      whitelist[user] = newlist
+      robot.brain.set('whitelist', whitelist )
+      return true
+
+    get: ->
+      return robot.brain.get('whitelist')
 
   robot.UpdateRequest = robot.orm.define 'UpdateRequest', {
     serial:  { type: Sequelize.STRING(50), allowNull: false }
@@ -50,6 +65,7 @@ module.exports = (robot) ->
   },
   { tableName: 'update_completeds', timestamps: false }
 
+  robot.whitelist = new Whitelist
   robot.orm.sync()
   robot.updateTemplate = fs.readFileSync path.dirname(__dirname) + "/views/update.eco", "utf-8"
 
@@ -63,10 +79,14 @@ module.exports = (robot) ->
       robot.logger.debug "Getting updates for #{channel}"
 
       releases = []
+      whitelist = []
+      for user,serials of robot.whitelist.get()
+        whitelist = whitelist.concat serials
+
       releases.push release for version,release of robot.github.releases['stable']
       if channel == 'prerelease'
         releases.push release for version,release of robot.github.releases['prerelease']
-      if channel == 'beta' and req.query['serial']? and req.query['serial'] in config.whitelist
+      if channel == 'beta' and req.query['serial']? and req.query['serial'] in whitelist
         releases.push release for version,release of robot.github.releases['beta']
 
       update_req = robot.UpdateRequest.build({
@@ -134,6 +154,21 @@ module.exports = (robot) ->
 
     res.end()
 
+  robot.respond /whitelist\s+show/, (msg) ->
+    msg.send """Hi #{msg.message.user.name}, the following serials are whitelisted:
+    #{ ("- #{user}, has #{if serials.length >0 then serials.join(',') else "no serials registered"}" for user, serials of robot.whitelist.get() ).join('\n')}
+    """
 
-  robot.respond /whitelist/, (msg) ->
-    msg.send "Hi #{msg.message.user.name}, the following serials are whitelisted: #{config.whitelist.join('\n')}"
+  robot.respond /whitelist\s+add\s+(\S+)\s+(\S+)/, (msg) ->
+    user = msg.match[1]
+    serial = msg.match[2]
+    return msg.send "Hmm... #{serial} doesn't look like a correct serial" unless serial.length is 16
+    return msg.send "Added!" if robot.whitelist.add user, serial
+
+
+  robot.respond /whitelist\s+remove\s+(\S+)\s+(\S+)/, (msg) ->
+    user = msg.match[1]
+    serial = msg.match[2]
+    return msg.send "Hmm... #{serial} doesn't look like a correct serial" unless serial.length is 16
+    return msg.send "Removed!" if robot.whitelist.remove user, serial
+

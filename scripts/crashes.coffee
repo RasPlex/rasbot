@@ -2,7 +2,7 @@
 #   Receives crash dumps
 #
 # Commands:
-#   hubot crash [id] - get the stack trace for a crash ID
+#   hubot crash [id] - get the stack trace for a crash ID (not yet implemented)
 #
 # Author
 #   dalehamel
