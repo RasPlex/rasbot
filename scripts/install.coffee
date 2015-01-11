@@ -33,7 +33,7 @@ module.exports = (robot) ->
     .success (err) ->
       if err?
         robot.logger.debug "Install request invalid, #{JSON.stringify err}"
-    install.save()
+    install_req.save()
     .complete (err) ->
       if err?
         robot.logger.debug "Install request couldn't be saved, #{JSON.stringify err}"
