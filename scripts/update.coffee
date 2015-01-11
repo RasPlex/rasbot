@@ -43,13 +43,14 @@ module.exports = (robot) ->
   robot.updateTemplate = fs.readFileSync path.dirname(__dirname) + "/views/update.eco", "utf-8"
 
   robot.router.get '/update', (req, res) ->
-    robot.logger.debug req.query
     if 'channel' of req.query and 'serial' of req.query \
     and 'revision' of req.query and 'version' of req.query
 
       addr = req.headers['x-forwarded-for'] || req.connection.remoteAddress
+
       channel = channels[req.query['channel']]
       robot.logger.debug "Getting updates for #{channel}"
+
       releases = []
       releases.push release for version,release of robot.github.releases['stable']
       if channel == 'prerelease'
@@ -65,7 +66,6 @@ module.exports = (robot) ->
         channel: req.query['channel']
         time:    new Date
       })
-      robot.logger.debug JSON.stringify update_req
       update_req.validate()
       .success (err) ->
         if err?

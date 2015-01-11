@@ -29,7 +29,6 @@ module.exports = (robot) ->
       platform:  platform
       time:      new Date
     })
-    robot.logger.debug JSON.stringify update_req
     install_req.validate()
     .success (err) ->
       if err?
