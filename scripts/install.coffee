@@ -7,7 +7,7 @@ Sequelize = require 'sequelize'
 module.exports = (robot) ->
 
   InstallRequest = robot.orm.define 'InstallRequest', {
-    id:       { type: Sequelize.INTEGER(10), autoIncrement: true }
+    id:       { type: Sequelize.INTEGER(10), autoIncrement: true, primaryKey: true}
     ipaddr:   { type: Sequelize.STRING(50), allowNull: false }
     platform: { type: Sequelize.STRING(50), allowNull: false }
     time:     { type: Sequelize.DATE, allowNull: false }

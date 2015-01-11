@@ -19,7 +19,7 @@ channels = {
 module.exports = (robot) ->
 
   UpdateRequest = robot.orm.define 'UpdateRequest', {
-    id:      { type: Sequelize.INTEGER(10), autoIncrement: true }
+    id:      { type: Sequelize.INTEGER(10), autoIncrement: true, primaryKey: true }
     serial:  { type: Sequelize.STRING(50), allowNull: false }
     hwrev:   { type: Sequelize.STRING(50), allowNull: false }
     ipaddr:  { type: Sequelize.STRING(50), allowNull: false }
@@ -30,7 +30,7 @@ module.exports = (robot) ->
   { tableName: 'update_requests', timestamps: false }
 
   UpdateCompleted = robot.orm.define 'UpdateCompleted', {
-    id:         { type: Sequelize.INTEGER(10), autoIncrement: true }
+    id:         { type: Sequelize.INTEGER(10), autoIncrement: true, primaryKey: true }
     serial:     { type: Sequelize.STRING(50), allowNull: false }
     hwrev:      { type: Sequelize.STRING(50), allowNull: false }
     ipaddr:     { type: Sequelize.STRING(50), allowNull: false }
