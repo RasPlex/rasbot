@@ -45,8 +45,7 @@ module.exports = (robot) ->
   robot.router.get '/update', (req, res) ->
     robot.logger.debug req.query
     if 'channel' of req.query and 'serial' of req.query \
-    and 'revision' of req.query and 'ipaddr' of req.query \
-    and 'version' of req.query
+    and 'revision' of req.query and 'version' of req.query
 
       addr = req.headers['x-forwarded-for'] || req.connection.remoteAddress
       channel = channels[req.query['channel']]

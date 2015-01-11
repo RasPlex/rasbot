@@ -17,6 +17,8 @@ module.exports = (robot) ->
 
   robot.router.get '/install', (req, res) ->
 
+    addr = req.headers['x-forwarded-for'] || req.connection.remoteAddress
+
     releases = []
     releases.push release for version,release of robot.github.releases['stable']
     releases.push release for version,release of robot.github.releases['prerelease']
