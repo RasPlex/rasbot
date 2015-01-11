@@ -1,3 +1,10 @@
+# Description:
+#   Provide a dump health check for pingdom
+#
+# Author
+#   dalehamel
+#
+
 
 module.exports = (robot) ->
 

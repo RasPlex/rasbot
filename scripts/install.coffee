@@ -1,12 +1,14 @@
 # Description:
-#   Example scripts for you to examine and try out.
+#   Service install requests
 #
-# Notes:
+# Author
+#   dalehamel
+#
 
 Sequelize = require 'sequelize'
 module.exports = (robot) ->
 
-  InstallRequest = robot.orm.define 'InstallRequest', {
+  robot.InstallRequest = robot.orm.define 'InstallRequest', {
     ipaddr:   { type: Sequelize.STRING(50), allowNull: false }
     platform: { type: Sequelize.STRING(50), allowNull: false }
     time:     { type: Sequelize.DATE, allowNull: false }
@@ -24,7 +26,7 @@ module.exports = (robot) ->
     releases.push release for version,release of robot.github.releases['stable']
     releases.push release for version,release of robot.github.releases['prerelease']
 
-    install_req = InstallRequest.build({
+    install_req = robot.InstallRequest.build({
       ipaddr:    addr
       platform:  platform
       time:      new Date

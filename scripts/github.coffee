@@ -1,9 +1,24 @@
+# Description:
+#   Synchronizes releases with github
+#
+# Configuration:
+#   HUBOT_GITHUB_TOKEN - A token that allows access to the repo containing the releases
+#   HUBOT_GITHUB_TICK - How frequently ( in minutes ) to check for update. Don't set too low, or you'll get throttled by github
+#
+# Commands:
+#   hubot update releases - Force an update instead of waiting for the next update tick
+#   hubot releases - List the releases on each channel
+#
+# Author
+#   dalehamel
+#
+# Notes:
+
 
 Yaml = require 'js-yaml'
 GitHubApi = require "github"
 CronJob = require('cron').CronJob
 moment = require 'moment'
-posix = require 'posix'
 
 config =
   token:          process.env.HUBOT_GITHUB_TOKEN
@@ -77,5 +92,12 @@ module.exports = (robot) ->
     msg.send "Ok, #{msg.message.user.name}, the releases have been updated"
 
   robot.respond /releases/, (msg) ->
-    msg.send JSON.stringify robot.github.releases
+    msg.send """Hi #{msg.message.user.name}, these are the active releases:
+    stable:
+    #{ ("- #{version}, published at #{moment(data['time']).format('YYYY-MM-DD HH:MM:SS UTC')}" for version, data of robot.github.releases['stable'] ).join('\n')}
+    prerelease:
+    #{ ("- #{version}, published at #{moment(data['time']).format('YYYY-MM-DD HH:MM:SS UTC')}" for version, data of robot.github.releases['prerelease'] ).join('\n')}
+    beta:
+    #{ ("- #{version}, published at #{data['time']}" for version, data of robot.github.releases['beta'] ).join('\n')}
+    """
 

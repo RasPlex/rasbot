@@ -3,3 +3,5 @@ node_modules
 .hubot_history
 *.swo
 *.swp
+db.development.sqlite
+crashdata

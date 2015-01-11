@@ -1,3 +1,14 @@
+# Description:
+#   Service install requests
+#
+# Commands:
+#   hubot whitelist - show the whitelisted users
+#
+# Author
+#   dalehamel
+#
+# Notes:
+#  * To do: store serials in brain instead of reading from env var
 
 
 eco  = require "eco"
@@ -18,7 +29,7 @@ channels = {
 
 module.exports = (robot) ->
 
-  UpdateRequest = robot.orm.define 'UpdateRequest', {
+  robot.UpdateRequest = robot.orm.define 'UpdateRequest', {
     serial:  { type: Sequelize.STRING(50), allowNull: false }
     hwrev:   { type: Sequelize.STRING(50), allowNull: false }
     ipaddr:  { type: Sequelize.STRING(50), allowNull: false }
@@ -28,7 +39,7 @@ module.exports = (robot) ->
   },
   { tableName: 'update_requests', timestamps: false }
 
-  UpdateCompleted = robot.orm.define 'UpdateCompleted', {
+  robot.UpdateCompleted = robot.orm.define 'UpdateCompleted', {
     serial:     { type: Sequelize.STRING(50), allowNull: false }
     hwrev:      { type: Sequelize.STRING(50), allowNull: false }
     ipaddr:     { type: Sequelize.STRING(50), allowNull: false }
@@ -58,7 +69,7 @@ module.exports = (robot) ->
       if channel == 'beta' and req.query['serial']? and req.query['serial'] in config.whitelist
         releases.push release for version,release of robot.github.releases['beta']
 
-      update_req = UpdateRequest.build({
+      update_req = robot.UpdateRequest.build({
         serial:  req.query['serial']
         hwrev:   req.query['revision']
         version: req.query['version']
@@ -94,7 +105,7 @@ module.exports = (robot) ->
 
       addr = req.headers['x-forwarded-for'] || req.connection.remoteAddress
 
-      updated_req = UpdateCompleted.build({
+      updated_req = robot.UpdateCompleted.build({
         serial:     req.query['serial']
         hwrev:      req.query['revision']
         version:    req.query['version']

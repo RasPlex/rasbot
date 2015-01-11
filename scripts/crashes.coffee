@@ -1,3 +1,16 @@
+# Description:
+#   Receives crash dumps
+#
+# Commands:
+#   hubot crash [id] - get the stack trace for a crash ID
+#
+# Author
+#   dalehamel
+#
+# Notes:
+#  * To do: process each dump as it's received if it's for a non retired release, make this dump data accessible
+#  * To do: delete the dumps after they've been traced, and gzip the traces
+
 fs = require "fs"
 path = require "path"
 zlib = require 'zlib'
@@ -7,7 +20,7 @@ Sequelize = require 'sequelize'
 
 module.exports = (robot) ->
 
-  Crash = robot.orm.define 'Crash', {
+  robot.Crash = robot.orm.define 'Crash', {
     version:            { type: Sequelize.STRING(100), allowNull: false }
     submitter_version:  { type: Sequelize.STRING(100), allowNull: false }
     crash_path:         { type: Sequelize.STRING(200), allowNull: false }
@@ -47,7 +60,7 @@ module.exports = (robot) ->
       fs.writeFile crashpath, base64.decode(req.body['dumpfileb64']), (error) ->
         robot.logger.error("Error writing file", error) if error
 
-      crash = Crash.build({
+      crash = robot.Crash.build({
         serial:            req.query['serial']
         hwrev:             req.query['revision']
         version:           req.query['version']

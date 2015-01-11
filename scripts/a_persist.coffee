@@ -1,3 +1,16 @@
+# Description:
+#   Provide an ORM on hubot for other scripts
+#
+# Author
+#   dalehamel
+#
+# Notes:
+#  * The 'a_' prefix is a hack that forces this script to be loaded first, so anything
+#    else needing acces to an ORM well have it set up already.
+
+
+
+
 fs        = require "fs"
 path      = require "path"
 Sequelize = require "sequelize"
