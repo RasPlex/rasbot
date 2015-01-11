@@ -72,6 +72,10 @@ module.exports = (robot) ->
   robot.github = new Github
   robot.github.updateReleases()
 
+  robot.respond /update\srelease(s)?/, (msg) ->
+    robot.github.updateReleases()
+    msg.send "Ok, #{msg.message.user.name}, the releases have been updated"
+
   robot.respond /releases/, (msg) ->
     msg.send JSON.stringify robot.github.releases
 
