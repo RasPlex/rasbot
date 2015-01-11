@@ -16,15 +16,29 @@ module.exports = (robot) ->
   robot.orm.sync()
 
   robot.router.get '/install', (req, res) ->
+
     releases = []
     releases.push release for version,release of robot.github.releases['stable']
     releases.push release for version,release of robot.github.releases['prerelease']
+
+    platform = req.query['platform'] || 'unknown'
+    install_req = InstallRequest.build({
+      ipaddr:    addr
+      platform:  platform
+      time:      new Date
+    })
+    robot.logger.debug JSON.stringify update_req
+    install_req.validate()
+    .success (err) ->
+      if err?
+        robot.logger.debug "Install request invalid, #{JSON.stringify err}"
+    install.save()
+    .complete (err) ->
+      if err?
+        robot.logger.debug "Install request couldn't be saved, #{JSON.stringify err}"
+      else
+        robot.logger.debug "Install request saved."
+
     res.send JSON.stringify releases
     res.end()
-  #
-  # robot.error (err, msg) ->
-  #   robot.logger.error "DOES NOT COMPUTE"
-  #
-  #   if msg?
-  #     msg.reply "DOES NOT COMPUTE"
-  #
+

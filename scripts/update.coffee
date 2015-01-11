@@ -40,15 +40,15 @@ module.exports = (robot) ->
   { tableName: 'update_completeds', timestamps: false }
 
   robot.orm.sync()
-
   robot.updateTemplate = fs.readFileSync path.dirname(__dirname) + "/views/update.eco", "utf-8"
+
   robot.router.get '/update', (req, res) ->
+    robot.logger.debug req.query
     if 'channel' of req.query and 'serial' of req.query \
     and 'revision' of req.query and 'ipaddr' of req.query \
     and 'version' of req.query
 
       addr = req.headers['x-forwarded-for'] || req.connection.remoteAddress
-      robot.logger.debug addr
       channel = channels[req.query['channel']]
       robot.logger.debug "Getting updates for #{channel}"
       releases = []
@@ -68,7 +68,7 @@ module.exports = (robot) ->
       })
       robot.logger.debug JSON.stringify update_req
       update_req.validate()
-      .then (err) ->
+      .success (err) ->
         if err?
           robot.logger.debug "Update request invalid, #{JSON.stringify err}"
       update_req.save()
@@ -78,7 +78,6 @@ module.exports = (robot) ->
         else
           robot.logger.debug "Update request saved."
 
-      robot.logger.debug "Here"
       update_xml = eco.render robot.updateTemplate, releases: releases, moment:moment
       res.send update_xml
     else
