@@ -43,6 +43,7 @@ module.exports = (robot) ->
 
   # Log everything
   robot.hear /(.*)/i, (msg) ->
+    robot.logger.debug "#{msg.message.room} #{JSON.stringify rooms}"
     return unless msg.message.room of rooms
 
     message = msg.match[1]
