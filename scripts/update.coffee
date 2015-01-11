@@ -1,8 +1,11 @@
 
+
 eco  = require "eco"
 fs   = require "fs"
 path = require 'path'
 moment = require 'moment'
+
+Sequelize = require 'sequelize'
 
 config =
   whitelist: if process.env.HUBOT_BETA_WHITELIST? then process.env.HUBOT_BETA_WHITELIST.split(',') else []
@@ -14,6 +17,31 @@ channels = {
 }
 
 module.exports = (robot) ->
+
+  UpdateRequest = robot.orm.define 'UpdateRequest', {
+    id:      { type: Sequelize.INTEGER(10), autoIncrement: true }
+    serial:  { type: Sequelize.STRING(50), allowNull: false }
+    hwrev:   { type: Sequelize.STRING(50), allowNull: false }
+    ipaddr:  { type: Sequelize.STRING(50), allowNull: false }
+    version: { type: Sequelize.STRING(50), allowNull: false }
+    channel: { type: Sequelize.STRING(50), allowNull: false }
+    time:    { type: Sequelize.DATE, allowNull: false }
+  },
+  { tableName: 'update_requests', timestamps: false }
+
+  UpdateCompleted = robot.orm.define 'UpdateCompleted', {
+    id:         { type: Sequelize.INTEGER(10), autoIncrement: true }
+    serial:     { type: Sequelize.STRING(50), allowNull: false }
+    hwrev:      { type: Sequelize.STRING(50), allowNull: false }
+    ipaddr:     { type: Sequelize.STRING(50), allowNull: false }
+    version:    { type: Sequelize.STRING(50), allowNull: false }
+    oldversion: { type: Sequelize.STRING(50), allowNull: false }
+    channel:    { type: Sequelize.STRING(50), allowNull: false }
+    time:       { type: Sequelize.DATE, allowNull: false }
+  },
+  { tableName: 'update_completeds', timestamps: false }
+
+  robot.orm.sync()
 
   robot.updateTemplate = fs.readFileSync path.dirname(__dirname) + "/views/update.eco", "utf-8"
   robot.router.get '/update', (req, res) ->

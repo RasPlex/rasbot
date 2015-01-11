@@ -3,8 +3,23 @@ path = require "path"
 zlib = require 'zlib'
 mkdirp = require 'mkdirp'
 base64 = require 'base64'
+Sequelize = require 'sequelize'
 
 module.exports = (robot) ->
+
+  Crash = robot.orm.define 'Crash', {
+    id:                 { type: Sequelize.INTEGER(10), allowNull: false, autoIncrement: true }
+    version:            { type: Sequelize.STRING(100), allowNull: false }
+    submitter_version:  { type: Sequelize.STRING(100), allowNull: false }
+    crash_path:         { type: Sequelize.STRING(200), allowNull: false }
+    serial:             { type: Sequelize.STRING(50), allowNull: false }
+    hwrev:              { type: Sequelize.STRING(50), allowNull: false }
+    ipaddr:             { type: Sequelize.STRING(50), allowNull: false }
+    time:               { type: Sequelize.DATE, allowNull: false }
+  },
+  { tableName: 'crashes', timestamps: false }
+
+  robot.orm.sync()
 
   robot.router.post '/crashes', (req, res) ->
     if ('dumpfileb64' of req.body) and ('version' of req.query) and ('serial' of req.query) and ('revision' of req.query)
