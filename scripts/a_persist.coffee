@@ -1,6 +1,9 @@
 # Description:
 #   Provide an ORM on hubot for other scripts
 #
+# Configuration:
+#   HUBOT_MYSQL_PASS - The MySQL password for the hubot user
+#
 # Author
 #   dalehamel
 #
