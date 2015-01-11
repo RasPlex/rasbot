@@ -33,6 +33,12 @@ module.exports = (robot) ->
 
   robot.orm.sync()
 
+  getNextId = ->
+    id = robot.brain.get('crashid') || 0
+    id++
+    robot.brain.set('crashid', id )
+    return id
+
   robot.router.post '/crashes', (req, res) ->
     if 'dumpfileb64' of req.body and 'version' of req.query \
     and 'serial' of req.query and 'revision' of req.query \
@@ -40,18 +46,8 @@ module.exports = (robot) ->
 
       addr = req.headers['x-forwarded-for'] || req.connection.remoteAddress
       version = req.query['version']
-      countpath = path.dirname(__dirname) + "/crashdata/count"
 
-      if fs.existsSync countpath
-        data = fs.readFileSync countpath, "utf-8"
-        count = parseInt data, 10
-      else
-        count = 0
-      count++
-      fs.writeFile countpath, count, (error) ->
-        robot.logger.error("Error writing count file", error) if error
-
-      id = count
+      id = getNextId()
       crashdir = path.dirname(__dirname) + "/crashdata/#{version}"
       mkdirp crashdir
       crashpath = "#{crashdir}/crash-#{id}"
