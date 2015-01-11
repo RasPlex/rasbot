@@ -7,11 +7,11 @@ base64 = require 'base64'
 module.exports = (robot) ->
 
   robot.router.post '/crashes', (req, res) ->
-    robot.logger.debug JSON.stringify req.query
     robot.logger.debug JSON.stringify req.params
     if 'dumpfileb64' of req.body and
-       'version' of req.body
-      version = req.body['version']
+      req.params.version?
+      robot.logger.debug JSON.stringify req.params
+      version = req.params.version
       countpath = path.dirname(__dirname) + "/crashdata/count"
 
       if fs.existsSync countpath
