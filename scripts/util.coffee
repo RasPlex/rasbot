@@ -9,7 +9,7 @@
 
 max_length = parseInt process.env.MESSAGE_MAX_LENGTH, 10
 max_lines  = parseInt process.env.MESSAGE_MAX_LINES, 10
-max_length = 200 if isNaN max_length
+max_length = 500 if isNaN max_length
 max_lines  = 10 if isNaN max_lines
 
 module.exports = (robot) ->
