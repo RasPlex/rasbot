@@ -61,9 +61,9 @@ module.exports = (robot) ->
       update_req = UpdateRequest.build({
         serial:  req.query['serial']
         hwrev:   req.query['revision']
-        ipaddr:  addr
         version: req.query['version']
         channel: req.query['channel']
+        ipaddr:  addr
         time:    new Date
       })
 
@@ -81,9 +81,48 @@ module.exports = (robot) ->
 
       update_xml = eco.render robot.updateTemplate, releases: releases, moment:moment
       res.send update_xml
+
     else
       res.send "Missing required parameters"
+
     res.end()
+
+  robot.router.get '/updated', (req, res) ->
+    if 'channel' of req.query and 'serial' of req.query \
+    and 'revision' of req.query and 'version' of req.query \
+    and 'fromVersion' of req.query
+
+      addr = req.headers['x-forwarded-for'] || req.connection.remoteAddress
+
+      updated_req = UpdateCompleted.build({
+        serial:     req.query['serial']
+        hwrev:      req.query['revision']
+        version:    req.query['version']
+        oldversion: req.query['fromVersion']
+        channel:    req.query['channel']
+        ipaddr:     addr
+        time:       new Date
+      })
+
+      updated_req.validate()
+      .success (err) ->
+        if err?
+          robot.logger.debug "Update completed request invalid, #{JSON.stringify err}"
+
+      updated_req.save()
+      .complete (err) ->
+        if err?
+          robot.logger.debug "Update completed request couldn't be saved, #{JSON.stringify err}"
+        else
+          robot.logger.debug "Update completed request saved."
+
+      res.send "Thanks for updating"
+
+    else
+      res.send "Missing required parameters"
+
+    res.end()
+
 
   robot.respond /whitelist/, (msg) ->
     msg.send "Hi #{msg.message.user.name}, the following serials are whitelisted: #{config.whitelist.join('\n')}"
