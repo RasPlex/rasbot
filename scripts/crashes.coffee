@@ -7,6 +7,8 @@ base64 = require 'base64'
 module.exports = (robot) ->
 
   robot.router.post '/crashes', (req, res) ->
+    robot.logger.debug req.query
+    robot.logger.debug req.params
     if 'dumpfileb64' of req.body and
        'version' of req.body
       version = req.body['version']
