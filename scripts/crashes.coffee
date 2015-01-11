@@ -7,8 +7,7 @@ base64 = require 'base64'
 module.exports = (robot) ->
 
   robot.router.post '/crashes', (req, res) ->
-    if 'dumpfileb64' of req.body and 'version' of req.query and
-      'serial' of req.query and 'revision' of req.query
+    if ('dumpfileb64' of req.body) and ('version' of req.query) and ('serial' of req.query) and ('revision' of req.query)
       version = req.query['version']
       countpath = path.dirname(__dirname) + "/crashdata/count"
 
