@@ -21,7 +21,11 @@ module.exports = (robot) ->
   robot.orm.sync()
 
   robot.router.post '/crashes', (req, res) ->
-    if ('dumpfileb64' of req.body) and ('version' of req.query) and ('serial' of req.query) and ('revision' of req.query)
+    if 'dumpfileb64' of req.body and 'version' of req.query \
+    and 'serial' of req.query and 'revision' of req.query \
+    and 'submitter_version' of req.query
+
+      addr = req.headers['x-forwarded-for'] || req.connection.remoteAddress
       version = req.query['version']
       countpath = path.dirname(__dirname) + "/crashdata/count"
 
@@ -38,9 +42,33 @@ module.exports = (robot) ->
       crashdir = path.dirname(__dirname) + "/crashdata/#{version}"
       mkdirp crashdir
       crashpath = "#{crashdir}/crash-#{id}"
+
       robot.logger.debug "Creating new crash #{crashpath}"
       fs.writeFile crashpath, base64.decode(req.body['dumpfileb64']), (error) ->
         robot.logger.error("Error writing file", error) if error
+
+      crash = Crash.build({
+        serial:            req.query['serial']
+        hwrev:             req.query['revision']
+        version:           req.query['version']
+        ipaddr:            addrp
+        time:              new Date
+        crash_path:        crashpath
+        submitter_version: req.query['submitter_version']
+      })
+
+      crash.validate()
+      .success (err) ->
+        if err?
+          robot.logger.debug "Crash invalid, #{JSON.stringify err}"
+
+      crash.save()
+      .complete (err) ->
+        if err?
+          robot.logger.debug "Crash couldn't be saved, #{JSON.stringify err}"
+        else
+          robot.logger.debug "Crash request saved."
+
       res.send "#{id}"
     else
       res.send "Invalid crash dump"

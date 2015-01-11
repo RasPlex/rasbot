@@ -18,21 +18,23 @@ module.exports = (robot) ->
   robot.router.get '/install', (req, res) ->
 
     addr = req.headers['x-forwarded-for'] || req.connection.remoteAddress
+    platform = req.query['platform'] || 'unknown'
 
     releases = []
     releases.push release for version,release of robot.github.releases['stable']
     releases.push release for version,release of robot.github.releases['prerelease']
 
-    platform = req.query['platform'] || 'unknown'
     install_req = InstallRequest.build({
       ipaddr:    addr
       platform:  platform
       time:      new Date
     })
+
     install_req.validate()
     .success (err) ->
       if err?
         robot.logger.debug "Install request invalid, #{JSON.stringify err}"
+
     install_req.save()
     .complete (err) ->
       if err?
@@ -42,4 +44,3 @@ module.exports = (robot) ->
 
     res.send JSON.stringify releases
     res.end()
-

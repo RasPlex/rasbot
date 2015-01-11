@@ -66,10 +66,12 @@ module.exports = (robot) ->
         channel: req.query['channel']
         time:    new Date
       })
+
       update_req.validate()
       .success (err) ->
         if err?
           robot.logger.debug "Update request invalid, #{JSON.stringify err}"
+
       update_req.save()
       .complete (err) ->
         if err?
@@ -81,6 +83,7 @@ module.exports = (robot) ->
       res.send update_xml
     else
       res.send "Missing required parameters"
+    res.end()
 
   robot.respond /whitelist/, (msg) ->
     msg.send "Hi #{msg.message.user.name}, the following serials are whitelisted: #{config.whitelist.join('\n')}"
