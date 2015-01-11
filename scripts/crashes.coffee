@@ -8,7 +8,6 @@ Sequelize = require 'sequelize'
 module.exports = (robot) ->
 
   Crash = robot.orm.define 'Crash', {
-    id:                 { type: Sequelize.INTEGER(10), allowNull: false, autoIncrement: true, primaryKey: true }
     version:            { type: Sequelize.STRING(100), allowNull: false }
     submitter_version:  { type: Sequelize.STRING(100), allowNull: false }
     crash_path:         { type: Sequelize.STRING(200), allowNull: false }

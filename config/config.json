@@ -6,7 +6,8 @@
     "options" : {
       "host" :    "127.0.0.1",
       "storage": "./db.development.sqlite",
-      "dialect" : "sqlite"
+      "dialect" : "sqlite",
+      "omitNull" : true
     }
   },
   "production" : {
@@ -14,7 +15,8 @@
     "username" : "updater",
     "options" : {
       "host" :    "127.0.0.1",
-      "dialect" : "mysql"
+      "dialect" : "mysql",
+      "omitNull" : true
     }
   }
 }

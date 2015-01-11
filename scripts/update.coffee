@@ -19,7 +19,6 @@ channels = {
 module.exports = (robot) ->
 
   UpdateRequest = robot.orm.define 'UpdateRequest', {
-    id:      { type: Sequelize.INTEGER(10), autoIncrement: true, primaryKey: true }
     serial:  { type: Sequelize.STRING(50), allowNull: false }
     hwrev:   { type: Sequelize.STRING(50), allowNull: false }
     ipaddr:  { type: Sequelize.STRING(50), allowNull: false }
@@ -30,7 +29,6 @@ module.exports = (robot) ->
   { tableName: 'update_requests', timestamps: false }
 
   UpdateCompleted = robot.orm.define 'UpdateCompleted', {
-    id:         { type: Sequelize.INTEGER(10), autoIncrement: true, primaryKey: true }
     serial:     { type: Sequelize.STRING(50), allowNull: false }
     hwrev:      { type: Sequelize.STRING(50), allowNull: false }
     ipaddr:     { type: Sequelize.STRING(50), allowNull: false }
@@ -45,7 +43,12 @@ module.exports = (robot) ->
 
   robot.updateTemplate = fs.readFileSync path.dirname(__dirname) + "/views/update.eco", "utf-8"
   robot.router.get '/update', (req, res) ->
-    if 'channel' of req.query
+    if 'channel' of req.query and 'serial' of req.query \
+    and 'revision' of req.query and 'ipaddr' of req.query \
+    and 'version' of req.query
+
+      addr = req.headers['x-forwarded-for'] || req.connection.remoteAddress
+      robot.logger.debug addr
       channel = channels[req.query['channel']]
       robot.logger.debug "Getting updates for #{channel}"
       releases = []
@@ -55,8 +58,31 @@ module.exports = (robot) ->
       if channel == 'beta' and req.query['serial']? and req.query['serial'] in config.whitelist
         releases.push release for version,release of robot.github.releases['beta']
 
+      update_req = UpdateRequest.build({
+        serial:  req.query['serial']
+        hwrev:   req.query['revision']
+        ipaddr:  addr
+        version: req.query['version']
+        channel: req.query['channel']
+        time:    new Date
+      })
+      robot.logger.debug JSON.stringify update_req
+      update_req.validate()
+      .then (err) ->
+        if err?
+          robot.logger.debug "Update request invalid, #{JSON.stringify err}"
+      update_req.save()
+      .complete (err) ->
+        if err?
+          robot.logger.debug "Update request couldn't be saved, #{JSON.stringify err}"
+        else
+          robot.logger.debug "Update request saved."
+
+      robot.logger.debug "Here"
       update_xml = eco.render robot.updateTemplate, releases: releases, moment:moment
       res.send update_xml
+    else
+      res.send "Missing required parameters"
 
   robot.respond /whitelist/, (msg) ->
     msg.send "Hi #{msg.message.user.name}, the following serials are whitelisted: #{config.whitelist.join('\n')}"
