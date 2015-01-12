@@ -63,8 +63,10 @@ module.exports = (robot) ->
             for asset in release['assets']
               if /img.gz/.test asset['name']
                 releases[channel][version]['install_url'] = "#{baseurl}/#{asset['name']}"
+                releases[channel][version]['install_count'] = asset['download_count']
               if /tar.gz/.test asset['name']
                 releases[channel][version]['update_url'] = "#{baseurl}/#{asset['name']}"
+                releases[channel][version]['update_count'] = asset['download_count']
 
             for field,data of body['install']
               for key, value of data
@@ -94,9 +96,13 @@ module.exports = (robot) ->
   robot.respond /releases/, (msg) ->
     msg.send """Hi #{msg.message.user.name}, these are the active releases:
     stable:
-    #{ ("- #{version}, published at #{moment(data['time']).format('YYYY-MM-DD HH:MM:SS UTC')}" for version, data of robot.github.releases['stable'] ).join('\n')}
+    #{ ("- #{version}, published at #{moment(data['time']).format(
+        'YYYY-MM-DD HH:MM:SS UTC')
+        }, U:#{data['update_count']}, D:#{data['install_count']}" for version, data of robot.github.releases['stable']).join('\n')}
     prerelease:
-    #{ ("- #{version}, published at #{moment(data['time']).format('YYYY-MM-DD HH:MM:SS UTC')}" for version, data of robot.github.releases['prerelease'] ).join('\n')}
+    #{ ("- #{version}, published at #{moment(data['time']).format(
+        'YYYY-MM-DD HH:MM:SS UTC')
+        }, U:#{data['update_count']}, D:#{data['install_count']}" for version, data of robot.github.releases['prerelease'] ).join('\n')}
     beta:
     #{ ("- #{version}, published at #{data['time']}" for version, data of robot.github.releases['beta'] ).join('\n')}
     """
