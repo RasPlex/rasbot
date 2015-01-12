@@ -7,7 +7,10 @@
 #
 # Commands:
 #   hubot (datadog|dd|dog|graph) [dashboard] [graph] - snapshot a specific graph from a dashboard that you've already told hubot about.
-#   hubot (datadog|dd|dog) graphs [query]- Show the available graphs, optionally matching a query regex
+#   hubot (datadog|dd|dog) new dash [dashboard] [id]- Add a new dashboard with an associated dashboard ID
+#   hubot (datadog|dd|dog) new graph [dashboard] [graphslug] [title]- Add a new graph on a dashboard with matching title
+#   hubot (datadog|dd|dog) rm dash [dashboard] - Remove a dashboard (and all graphs) from hubot's memory
+#   hubot (datadog|dd|dog) rm graph [dashboard] [graphslug] - Remove a graph from hubot's memory.
 #   hubot (datadog|dd|dog) graph me <amount><unit> <metric query> - Queries for a graph snapshot
 #   hubot (datadog|dd|dog) metric search <metric query> - Queries for a list of matching metrics
 #
@@ -16,7 +19,7 @@
 #
 # Notes:
 #   * Built using https://www.npmjs.com/package/dogapi
-#   * Forked from https://github.com/zestia/hubot-datadog
+#   * To do: actually check that dashboards / graphs exist, and pass callbacks to handle these scenarios correctly
 
 dog    = require 'dogapi'
 moment = require 'moment'
