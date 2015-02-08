@@ -66,6 +66,7 @@ module.exports = (robot) ->
   { tableName: 'update_completeds', timestamps: false }
 
   intVersion = (version) ->
+    return 1000000 if version.match('wip')? # never update wip
     version = version.replace /\D/g, ''
     try
       version = parseInt version,10
