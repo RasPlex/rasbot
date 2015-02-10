@@ -80,6 +80,7 @@ module.exports = (robot) ->
   robot.updateTemplate = fs.readFileSync path.dirname(__dirname) + "/views/update.eco", "utf-8"
 
   robot.router.get '/update', (req, res) ->
+    robot.logger.debug "Got params, #{JSON.stringify req.query}"
     if 'channel' of req.query and 'serial' of req.query \
     and 'revision' of req.query and 'version' of req.query
 
