@@ -59,28 +59,74 @@ module.exports = (robot) ->
               notes: body['changes'].join('\n')
               time: time
               id: count
+              devices: {}
 
-            for asset in release['assets']
-              if /img.gz/.test asset['name']
-                releases[channel][version]['install_url'] = "#{baseurl}/#{asset['name']}"
-                releases[channel][version]['install_count'] = asset['download_count']
-              if /tar.gz/.test asset['name']
-                releases[channel][version]['update_url'] = "#{baseurl}/#{asset['name']}"
-                releases[channel][version]['update_count'] = asset['download_count']
+            install_images = {}
 
             for field,data of body['install']
               for key, value of data
+                switch field
+                  when "RPi"
+                    releases[channel][version]['devices'][field] = {} unless releases[channel][version]['devices'][field]?
+                    for k,v of value
+                      switch k
+                        when 'file' then releases[channel][version]['devices'][field]['install_file'] = v
+                        when 'md5sum' then releases[channel][version]['devices'][field]['install_sum'] = v
+                        when 'url' then releases[channel][version]['devices'][field]['install_url'] = v
 
-                switch key
-                  when 'md5sum' then releases[channel][version]['install_sum'] = value
-                  when 'url' then releases[channel][version]['install_url'] = value
+                  when "RPi2"
+                    releases[channel][version]['devices'][field] = {} unless releases[channel][version]['devices'][field]?
+                    for k,v of value
+                      switch k
+                        when 'file' then releases[channel][version]['devices'][field]['install_file'] = v
+                        when 'md5sum' then releases[channel][version]['devices'][field]['install_sum'] = v
+                        when 'url' then releases[channel][version]['devices'][field]['install_url'] = v
+
+                  else
+                    releases[channel][version]['devices']['RPi'] = {} unless releases[channel][version]['devices']['RPi']?
+                    switch key
+                      when 'file' then releases[channel][version]['devices']['RPi']['install_file'] = value
+                      when 'md5sum' then releases[channel][version]['devices']['RPi']['install_sum'] = value
+                      when 'url' then releases[channel][version]['devices']['RPi']['install_url'] = value
 
             for field, data of body['update']
               for key, value of data
+                switch field
+                  when "RPi"
+                    releases[channel][version]['devices'][field] = {} unless releases[channel][version]['devices'][field]?
+                    for k,v of value
+                      switch k
+                        when 'file' then releases[channel][version]['devices'][field]['update_file'] = v
+                        when 'shasum' then releases[channel][version]['devices'][field]['update_sum'] = v
+                        when 'url' then releases[channel][version]['devices'][field]['update_url'] = v
 
-                switch key
-                  when 'shasum' then releases[channel][version]['update_sum'] = value
-                  when 'url' then releases[channel][version]['update_url'] = value
+                  when "RPi2"
+                    releases[channel][version]['devices'][field] = {} unless releases[channel][version]['devices'][field]?
+                    for k,v of value
+                      switch k
+                        when 'file' then releases[channel][version]['devices'][field]['update_file'] = v
+                        when 'shasum' then releases[channel][version]['devices'][field]['update_sum'] = v
+                        when 'url' then releases[channel][version]['devices'][field]['update_url'] = v
+
+                  else
+                    releases[channel][version]['devices']['RPi'] = {} unless releases[channel][version]['devices']['RPi']?
+                    switch key
+                      when 'file' then releases[channel][version]['devices']['RPi']['update_file'] = value
+                      when 'shasum' then releases[channel][version]['devices']['RPi']['update_sum'] = value
+                      when 'url' then releases[channel][version]['devices']['RPi']['update_url'] = value
+
+            for asset in release['assets']
+              if /img.gz/.test asset['name']
+                for device, data of releases[channel][version]['devices']
+                  if data['install_file'] == asset['name']
+                    releases[channel][version]['devices'][device]['install_url'] = "#{baseurl}/#{asset['name']}" unless 'install_url' of data
+                    releases[channel][version]['devices'][device]['install_count'] = asset['download_count']
+
+              if /tar.gz/.test asset['name']
+                for device, data of releases[channel][version]['devices']
+                  if data['update_file'] == asset['name']
+                    releases[channel][version]['devices'][device]['update_url'] = "#{baseurl}/#{asset['name']}" unless 'update_url' of data
+                    releases[channel][version]['devices'][device]['update_count'] = asset['download_count']
 
             releases[channel][version]['autoupdate'] = 'update_url' of releases[channel][version]
 
@@ -92,17 +138,18 @@ module.exports = (robot) ->
   robot.respond /update\srelease(s)?/, (msg) ->
     robot.github.updateReleases()
     msg.send "Ok, #{msg.message.user.name}, the releases have been updated"
+    robot.logger.debug JSON.stringify robot.github.releases
 
   robot.respond /releases/, (msg) ->
     msg.send """Hi #{msg.message.user.name}, these are the active releases:
     stable:
     #{ ("- #{version}, published at #{moment(data['time']).format(
         'YYYY-MM-DD HH:MM:SS UTC')
-        }, U:#{data['update_count']}, D:#{data['install_count']}" for version, data of robot.github.releases['stable']).join('\n')}
+        }" for version, data of robot.github.releases['stable']).join('\n')}
     prerelease:
     #{ ("- #{version}, published at #{moment(data['time']).format(
         'YYYY-MM-DD HH:MM:SS UTC')
-        }, U:#{data['update_count']}, D:#{data['install_count']}" for version, data of robot.github.releases['prerelease'] ).join('\n')}
+        }" for version, data of robot.github.releases['prerelease'] ).join('\n')}
     beta:
     #{ ("- #{version}, published at #{data['time']}" for version, data of robot.github.releases['beta'] ).join('\n')}
     """
