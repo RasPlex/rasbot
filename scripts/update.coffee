@@ -83,6 +83,12 @@ module.exports = (robot) ->
     if 'channel' of req.query and 'serial' of req.query \
     and 'revision' of req.query and 'version' of req.query
 
+      revision = req.query['revision']
+      if revision[0..1] == 'a2'
+        device = 'RPi2'
+      else
+        device = 'RPi'
+
       addr = req.headers['x-forwarded-for'] || req.connection.remoteAddress
 
       channel = channels[req.query['channel']]
@@ -94,17 +100,47 @@ module.exports = (robot) ->
 
       for version,release of robot.github.releases['stable']
         if intVersion(version) > intVersion(req.query['version'])
-          releases.push release
+          if device of release['devices']
+            obj = {
+              id: release['id']
+              version: release['version']
+              time: release['time']
+              autoupdate: release['autoupdate']
+              update_url: release['devices'][device]['update_url']
+              update_sum: release['devices'][device]['update_sum']
+            }
+
+            releases.push obj
 
       if channel == 'prerelease'
         for version,release of robot.github.releases['prerelease']
           if intVersion(version) > intVersion(req.query['version'])
-            releases.push release
+            if device of release['devices']
+              obj = {
+                id: release['id']
+                version: release['version']
+                time: release['time']
+                autoupdate: release['autoupdate']
+                update_url: release['devices'][device]['update_url']
+                update_sum: release['devices'][device]['update_sum']
+              }
+
+              releases.push obj
 
       if channel == 'beta' and req.query['serial']? and req.query['serial'] in whitelist
         for version,release of robot.github.releases['beta']
           if intVersion(version) > intVersion(req.query['version'])
-            releases.push release
+            if device of release['devices']
+              obj = {
+                id: release['id']
+                version: release['version']
+                time: release['time']
+                autoupdate: release['autoupdate']
+                update_url: release['devices'][device]['update_url']
+                update_sum: release['devices'][device]['update_sum']
+              }
+
+              releases.push obj
 
       update_req = robot.UpdateRequest.build({
         serial:  req.query['serial']
