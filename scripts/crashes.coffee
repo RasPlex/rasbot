@@ -15,7 +15,6 @@ fs = require "fs"
 path = require "path"
 zlib = require 'zlib'
 mkdirp = require 'mkdirp'
-base64 = require 'base64'
 Sequelize = require 'sequelize'
 
 module.exports = (robot) ->
@@ -53,7 +52,8 @@ module.exports = (robot) ->
       crashpath = "#{crashdir}/crash-#{id}"
 
       robot.logger.debug "Creating new crash #{crashpath}"
-      fs.writeFile crashpath, base64.decode(req.body['dumpfileb64']), (error) ->
+      dumpdata = Buffer(req.body['dumpfileb64'], 'base64').toString("ascii")
+      fs.writeFile crashpath, dumpdata, (error) ->
         robot.logger.error("Error writing file", error) if error
 
       crash = robot.Crash.build({
