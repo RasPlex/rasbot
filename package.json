@@ -5,6 +5,7 @@
   "author": "dale.hamel@srvthe.net",
   "description": "RasPlex robot for great good",
   "dependencies": {
+    "base64": "^2.1.0",
     "cron": "^1.0.5",
     "dogapi": "^0.1.7",
     "eco": "^1.1.0-rc-3",
