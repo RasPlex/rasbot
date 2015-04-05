@@ -129,18 +129,17 @@ module.exports = (robot) ->
 
       if channel == 'beta' and req.query['serial']? and req.query['serial'] in whitelist
         for version,release of robot.github.releases['beta']
-          if intVersion(version) > intVersion(req.query['version'])
-            if device of release['devices']
-              obj = {
-                id: release['id']
-                version: release['version']
-                time: release['time']
-                autoupdate: release['autoupdate']
-                update_url: release['devices'][device]['update_url']
-                update_sum: release['devices'][device]['update_sum']
-              }
+          if device of release['devices']
+            obj = {
+              id: release['id']
+              version: release['version']
+              time: release['time']
+              autoupdate: release['autoupdate']
+              update_url: release['devices'][device]['update_url']
+              update_sum: release['devices'][device]['update_sum']
+            }
 
-              releases.push obj
+            releases.push obj
 
       update_req = robot.UpdateRequest.build({
         serial:  req.query['serial']
