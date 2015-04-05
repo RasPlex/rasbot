@@ -84,7 +84,7 @@ module.exports = (robot) ->
     and 'revision' of req.query and 'version' of req.query
 
       revision = req.query['revision']
-      if revision[0] == 'a'
+      if revision.match(/^a/)
         device = 'RPi2'
       else
         device = 'RPi'
