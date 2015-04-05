@@ -53,7 +53,7 @@ module.exports = (robot) ->
 
       robot.logger.debug "Creating new crash #{crashpath}"
       dumpdata = Buffer(req.body['dumpfileb64'], 'base64').toString("ascii")
-      fs.writeFile crashpath, dumpdata, (error) ->
+      fs.writeFile crashpath, dumpdata, 'binary', (error) ->
         robot.logger.error("Error writing file", error) if error
 
       crash = robot.Crash.build({
