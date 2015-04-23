@@ -75,6 +75,21 @@ module.exports = (robot) ->
     version = -1 if isNaN version
     return version
 
+
+  piVersion = (hwrev) ->
+    versions = [1, 1, 1, 1, 2, 1, 1 ]
+    hwdata = parseInt(hwrev,16)
+    schema = (hwdata & 0x800000) >> 23
+    if schema == 1
+      idx = (hwdata & 0xFF0) >> 4
+      if idx < (versions.length - 1)
+        version = versions[idx]
+      else
+        version =  1
+    else
+      version = 1
+    return version
+
   robot.whitelist = new Whitelist
   robot.orm.sync()
   robot.updateTemplate = fs.readFileSync path.dirname(__dirname) + "/views/update.eco", "utf-8"
@@ -84,7 +99,7 @@ module.exports = (robot) ->
     and 'revision' of req.query and 'version' of req.query
 
       revision = req.query['revision']
-      if revision.match(/^a/)
+      if piVersion(revision) == 2
         device = 'RPi2'
       else
         device = 'RPi'
@@ -224,3 +239,7 @@ module.exports = (robot) ->
     return msg.send "Hmm... #{serial} doesn't look like a correct serial" unless serial.length is 16
     return msg.send "Removed!" if robot.whitelist.remove user, serial
 
+  robot.respond /piversion\s+(\S+)/, (msg) ->
+    hwrev = msg.match[1]
+    version = piVersion(hwrev)
+    return msg.send "That's a Raspberry Pi version #{version}"
