@@ -24,7 +24,9 @@ config =
   token:          process.env.HUBOT_GITHUB_TOKEN
   tick:           process.env.HUBOT_GITHUB_TICK
 
+
 module.exports = (robot) ->
+
 
   class Github
 
@@ -37,6 +39,7 @@ module.exports = (robot) ->
 
     updateReleases: ->
       robot.github.github.releases.listReleases {owner: 'RasPlex', repo: 'RasPlex' }, (err,newReleases) ->
+        stats = {}
         releases = {}
         count=0
         for release in newReleases
@@ -115,25 +118,34 @@ module.exports = (robot) ->
                       when 'shasum' then releases[channel][version]['devices']['RPi']['update_sum'] = value
                       when 'url' then releases[channel][version]['devices']['RPi']['update_url'] = value
 
+            stats[release['tag_name']] = { 'install' : {}, 'update' : {}}
             for asset in release['assets']
               if /img.gz/.test asset['name']
                 for device, data of releases[channel][version]['devices']
                   if data['install_file'] == asset['name']
+                    stats[release['tag_name']]['install'][device] = asset['download_count']
                     releases[channel][version]['devices'][device]['install_url'] = "#{baseurl}/#{asset['name']}" unless 'install_url' of data
-                    releases[channel][version]['devices'][device]['install_count'] = asset['download_count']
 
               if /tar.gz/.test asset['name']
                 for device, data of releases[channel][version]['devices']
                   if data['update_file'] == asset['name']
+                    stats[release['tag_name']]['update'][device] = asset['download_count']
                     releases[channel][version]['devices'][device]['update_url'] = "#{baseurl}/#{asset['name']}" unless 'update_url' of data
-                    releases[channel][version]['devices'][device]['update_count'] = asset['download_count']
 
             releases[channel][version]['autoupdate'] = 'update_url' of releases[channel][version]
 
+        robot.github.stats = stats
         robot.github.releases = releases
+
 
   robot.github = new Github
   robot.github.updateReleases()
+
+  formatRelease = (version, data) ->
+    return """#{version}:
+    \tinstalls: RPi1 #{data['install']['RPi']} #{if data['install']['RPi2'] then ", RPi2: #{data['install']['RPi2']}" else ""}
+    \tupdates:  RPi1 #{data['update']['RPi']} #{if data['update']['RPi2'] then ", RPi2: #{data['update']['RPi2']}" else ""}
+      """
 
   robot.respond /update\srelease(s)?/, (msg) ->
     robot.github.updateReleases()
@@ -154,3 +166,12 @@ module.exports = (robot) ->
     #{ ("- #{version}, published at #{data['time']}" for version, data of robot.github.releases['beta'] ).join('\n')}
     """
 
+  robot.respond /release\s+downloads\s*(\S+)?/, (msg) ->
+    version = msg.match[1]
+    if version and robot.github.stats[version]
+      msg.send formatRelease(version, robot.github.stats[version])
+    else
+      releases = []
+      for version, data of robot.github.stats
+         releases.push formatRelease(version, data)
+      msg.send releases.join('\n')
