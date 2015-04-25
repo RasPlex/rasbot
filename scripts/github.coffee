@@ -8,6 +8,7 @@
 # Commands:
 #   hubot update releases - Force an update instead of waiting for the next update tick
 #   hubot releases - List the releases on each channel
+#   hubot release downloads [version] - Show download stats for each release, or a specific release
 #
 # Author
 #   dalehamel
