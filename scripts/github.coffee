@@ -143,8 +143,8 @@ module.exports = (robot) ->
 
   formatRelease = (version, data) ->
     return """#{version}:
-    \tinstalls: RPi1 #{data['install']['RPi']} #{if data['install']['RPi2'] then ", RPi2: #{data['install']['RPi2']}" else ""}
-    \tupdates:  RPi1 #{data['update']['RPi']} #{if data['update']['RPi2'] then ", RPi2: #{data['update']['RPi2']}" else ""}
+    \tinstalls: RPi1: #{data['install']['RPi']} #{if data['install']['RPi2'] then ", RPi2: #{data['install']['RPi2']}" else ""}
+    \tupdates:  RPi1: #{data['update']['RPi']} #{if data['update']['RPi2'] then ", RPi2: #{data['update']['RPi2']}" else ""}
       """
 
   robot.respond /update\srelease(s)?/, (msg) ->
