@@ -77,15 +77,11 @@ module.exports = (robot) ->
 
 
   piVersion = (hwrev) ->
-    versions = [1, 1, 1, 1, 2, 1, 1 ]
     hwdata = parseInt(hwrev,16)
     schema = (hwdata & 0x800000) >> 23
     if schema == 1
-      idx = (hwdata & 0xFF0) >> 4
-      if idx < (versions.length - 1)
-        version = versions[idx]
-      else
-        version =  1
+      processor = (hwdata & 0xF000) >> 12
+      version = processor + 1
     else
       version = 1
     return version
@@ -99,7 +95,7 @@ module.exports = (robot) ->
     and 'revision' of req.query and 'version' of req.query
 
       revision = req.query['revision']
-      if piVersion(revision) == 2
+      if piVersion(revision) > 1
         device = 'RPi2'
       else
         device = 'RPi'
